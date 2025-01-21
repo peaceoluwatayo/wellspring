@@ -1,0 +1,6 @@
+Flask
+gunicorn
+psycopg2
+pandas
+streamlit
+requests
