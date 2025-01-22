@@ -1,9 +1,13 @@
 import streamlit as st
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 
-# Flask API endpoint URL
-FLASK_API_URL = "http://127.0.0.1:5000/submit_behavior"  # Replace <flask-api-url> with your actual Flask API URL
+# Load environment variables from the .env file
+load_dotenv()
+
+FLASK_API_URL = os.getenv('FLASK_API_URL')
 
 # Predefined data for the app
 TEACHERS = ["Mr. John Doe", "Mrs. Jane Smith", "Ms. Emily Johnson", "Mr. Michael Brown", "Mrs. Sarah Davis"]
