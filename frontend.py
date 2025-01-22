@@ -7,7 +7,8 @@ import os
 # Load environment variables from the .env file
 load_dotenv()
 
-FLASK_API_URL = os.getenv('FLASK_API_URL')
+FLASK_API_URL = os.getenv('FLASK_API_URL') + "/submit_behavior"
+
 
 # Predefined data for the app
 TEACHERS = ["Mr. John Doe", "Mrs. Jane Smith", "Ms. Emily Johnson", "Mr. Michael Brown", "Mrs. Sarah Davis"]
