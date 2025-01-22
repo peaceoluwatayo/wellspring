@@ -7,7 +7,7 @@ import os
 # Load environment variables from the .env file
 load_dotenv()
 
-FLASK_API_URL = os.getenv('FLASK_API_URL') + "/submit_behavior"
+FLASK_API_URL = os.getenv('FLASK_API_URL') + '/submit_behavior'
 
 
 # Predefined data for the app

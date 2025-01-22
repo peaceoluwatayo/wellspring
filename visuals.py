@@ -7,7 +7,7 @@ import os
 # Load environment variables from the .env file
 load_dotenv()
 
-FLASK_API_URL = os.getenv('FLASK_API_URL') + "/get_behavior_data"
+FLASK_API_URL = os.getenv('FLASK_API_URL') + '/get_behavior_data'
 
 # Helper function to fetch data from the API
 def fetch_behavior_data():
