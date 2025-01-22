@@ -62,11 +62,14 @@ def submit_behavior():
         return jsonify({'error': str(e)}), 400
     
 
-    
+
 @app.route('/get_behavior_data', methods=['GET'])
 def get_behavior_data():
     try:
         behaviors = StudentBehavior.query.all()
+        if not behaviors:
+            app.logger.warning("No behavior data found in the database.")
+        
         data = [
             {
                 'id': behavior.id,
@@ -82,11 +85,11 @@ def get_behavior_data():
             }
             for behavior in behaviors
         ]
+        app.logger.info(f"Fetched {len(data)} records from the database.")
         return jsonify(data), 200
     except Exception as e:
+        app.logger.error(f"Error fetching data: {str(e)}")
         return jsonify({'error': str(e)}), 400
    
-
-
 if __name__ == '__main__':
     app.run(debug=True)
