@@ -62,8 +62,8 @@ def submit_behavior():
         return jsonify({'error': str(e)}), 400
     
 
-@app.route('/get_behavior_data', methods=['GET'])
-def get_behavior_data():
+@app.route('/get_behavior', methods=['GET'])
+def get_behavior():
     try:
         behaviors = StudentBehavior.query.all()
         data = [
