@@ -60,6 +60,32 @@ def submit_behavior():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
+    
+
+    
+@app.route('/get_behavior_data', methods=['GET'])
+def get_behavior_data():
+    try:
+        behaviors = StudentBehavior.query.all()
+        data = [
+            {
+                'id': behavior.id,
+                'teacher': behavior.teacher,
+                'class_name': behavior.class_name,
+                'section': behavior.section,
+                'behavior': behavior.behavior,
+                'students': behavior.students,
+                'subject': behavior.subject,
+                'date': behavior.date.strftime('%Y-%m-%d'),
+                'timestamp': behavior.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                'feedback': behavior.feedback,
+            }
+            for behavior in behaviors
+        ]
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+   
 
 
 if __name__ == '__main__':
