@@ -80,6 +80,17 @@ def save_data_to_api(data):
 def app():
     st.title("Student Behavior Tracker")
 
+    # Initialize session state for form data and submission tracking
+    if "form_data" not in st.session_state:
+        st.session_state["form_data"] = {}
+
+    if "submitted" not in st.session_state:
+        st.session_state["submitted"] = False
+
+    if st.session_state["submitted"]:
+        st.warning("You have already submitted the form. Refresh the page to submit again.")
+        st.stop()
+
     teacher = st.selectbox("Select Teacher", TEACHERS)
     class_name = st.selectbox("Select Class", list(STUDENTS.keys()))
     section = st.selectbox("Select Section", list(STUDENTS[class_name].keys()))
@@ -92,23 +103,28 @@ def app():
         "Forgot Note", "Pen/Pencil/Math Set/Calculator", "Forgot Tabs", "Sleeping",
         "Active Class Participation", "General Feedback on Student Behavior"
     ]
+    
 
     selected_students_for_behaviors = {}
     for behavior in behaviors:
         if behavior == "General Feedback on Student Behavior":
-            selected_students_for_behaviors[behavior] = st.text_area(f"Enter General Feedback for {behavior}")
+            selected_students_for_behaviors[behavior] = st.text_area(f"Enter {behavior}")
         else:
             selected_students_for_behaviors[behavior] = st.multiselect(
                 f"Select Students for {behavior} (or select 'None')", ["None"] + students
             )
 
-    all_filled = True
-    for behavior, selected_students in selected_students_for_behaviors.items():
-        if behavior != "General Feedback on Student Behavior" and not selected_students:
-            all_filled = False
+    # Store data in session state for autosaving
+    st.session_state["form_data"] = selected_students_for_behaviors
 
-    if st.button("Submit"):
+    def submit_form():
+        st.session_state["submitted"] = True  # Disable the button immediately
         general_feedback = selected_students_for_behaviors["General Feedback on Student Behavior"]
+
+        all_filled = True
+        for behavior, selected_students in selected_students_for_behaviors.items():
+            if behavior != "General Feedback on Student Behavior" and not selected_students:
+                all_filled = False
 
         if not all_filled:
             st.error("Please ensure all behavior sections are filled out before submitting.")
@@ -147,6 +163,10 @@ def app():
                 st.success(message)
             else:
                 st.error(message)
+
+    # Submit button, disabled if already submitted
+    if st.button("Submit", disabled=st.session_state["submitted"]):
+        submit_form()
 
 if __name__ == "__main__":
     app()

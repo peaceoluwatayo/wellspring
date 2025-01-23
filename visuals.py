@@ -3,6 +3,11 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 import os
+import altair as alt
+import warnings
+
+# Suppress specific warning related to Altair
+warnings.filterwarnings("ignore", message="I don't know how to infer vegalite type")
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -13,18 +18,12 @@ FLASK_API_URL = os.getenv('FLASK_API_URL') + '/get_behavior'
 def fetch_behavior_data():
     try:
         response = requests.get(FLASK_API_URL)
-        # Log the response status code and body for debugging
-        st.write(f"Response Status Code: {response.status_code}")
         if response.status_code == 200:
-            data = response.json()
-            st.write(f"Response Data: {data}")  # Log the data to Streamlit
-            return pd.DataFrame(data), None
+            return pd.DataFrame(response.json()), None
         else:
             error_message = response.json().get('error', 'Failed to fetch data from API.')
-            st.write(f"Error Message: {error_message}")  # Log the error message
             return None, error_message
     except Exception as e:
-        st.write(f"Error: {e}")  # Log the exception
         return None, str(e)
 
 # Streamlit app
@@ -45,6 +44,7 @@ def app():
     # Data Filters
     st.sidebar.header("Filters")
     
+    students = st.sidebar.multiselect("Filter by Student", data["students"].unique())
     teachers = st.sidebar.multiselect("Filter by Teacher", data["teacher"].unique())
     classes = st.sidebar.multiselect("Filter by Class", data["class_name"].unique())
     sections = st.sidebar.multiselect("Filter by Section", data["section"].unique())
@@ -55,6 +55,8 @@ def app():
     # Apply filters
     filtered_data = data.copy()
     
+    if students:
+        filtered_data = filtered_data[filtered_data["students"].str.contains('|'.join(students), na=False)]
     if teachers:
         filtered_data = filtered_data[filtered_data["teacher"].isin(teachers)]
     if classes:
@@ -64,18 +66,35 @@ def app():
     if subjects:
         filtered_data = filtered_data[filtered_data["subject"].isin(subjects)]
     filtered_data = filtered_data[(
-        pd.to_datetime(filtered_data["date"]) >= pd.to_datetime(start_date)) &
+        pd.to_datetime(filtered_data["date"]) >= pd.to_datetime(start_date)) & 
         (pd.to_datetime(filtered_data["date"]) <= pd.to_datetime(end_date))
     ]
     
     # Display filtered data
     st.subheader("Filtered Behavior Data")
-    st.dataframe(filtered_data)
+    if filtered_data.empty:
+        st.warning("No matching data found.")
+    else:
+        st.dataframe(filtered_data)
     
     # Behavior Counts
     st.subheader("Behavior Analysis")
-    behavior_counts = filtered_data["behavior"].value_counts()
-    st.bar_chart(behavior_counts)
+    if "behavior" in filtered_data.columns:
+        # Clean behavior column
+        filtered_data['behavior'] = filtered_data['behavior'].fillna('No Behavior')
+
+        # Generate bar chart for behavior counts
+        behavior_counts = filtered_data['behavior'].value_counts().reset_index()
+        behavior_counts.columns = ['Behavior', 'Count']
+        
+        chart = alt.Chart(behavior_counts).mark_bar().encode(
+            x='Behavior:N',
+            y='Count:Q'
+        )
+        
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        st.warning("No behavior data available for analysis.")
     
     # Feedback Analysis
     st.subheader("General Feedback")
