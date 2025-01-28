@@ -49,6 +49,7 @@ def app():
     classes = st.sidebar.multiselect("Filter by Class", data["class_name"].unique())
     sections = st.sidebar.multiselect("Filter by Section", data["section"].unique())
     subjects = st.sidebar.multiselect("Filter by Subject", data["subject"].unique())
+    behaviors = st.sidebar.multiselect("Filter by Behavior", data["behavior"].dropna().unique())
     start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime(data["date"]).min())
     end_date = st.sidebar.date_input("End Date", value=pd.to_datetime(data["date"]).max())
     
@@ -65,6 +66,8 @@ def app():
         filtered_data = filtered_data[filtered_data["section"].isin(sections)]
     if subjects:
         filtered_data = filtered_data[filtered_data["subject"].isin(subjects)]
+    if behaviors:
+        filtered_data = filtered_data[filtered_data["behavior"].isin(behaviors)]
     filtered_data = filtered_data[(
         pd.to_datetime(filtered_data["date"]) >= pd.to_datetime(start_date)) & 
         (pd.to_datetime(filtered_data["date"]) <= pd.to_datetime(end_date))
